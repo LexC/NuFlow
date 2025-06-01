@@ -52,11 +52,25 @@ bash setting/miniconda_env_manager.sh
 ### Command-Line Interface (CLI)
 
 ```bash
-python nuflow.py -i data/resources/Instructions_template.xlsx -p
+python nuflow.py -i resources/Instructions_template.xlsx -p
 ```
 
 * `-i` or `--input`: Path to instruction file
 * `-p` or `--paired`: Use paired tests (e.g., Wilcoxon)
+
+### Filling the Instructions Excel File
+
+To run the analysis properly, you must configure the Excel instruction file correctly:
+
+#### Tab: `Data`
+
+* **Column `Data`**: Provide the full path to the experiment file (e.g., a `.xlsx` or `.csv`).
+* **Column `Experiment`**: An identifier for each experiment; this can be a string or a number.
+
+#### Tab: `Configuration`
+
+* **Column `Scores`**: List all subject groups/categories (e.g., `High`, `Low`, `HC`). Ensure your experiment data file has a column named exactly `Scores`.
+* **Column `Output Folder`**: In the cell below this column header, provide the full path to the folder where result files and plots should be saved.
 
 ## Output
 
