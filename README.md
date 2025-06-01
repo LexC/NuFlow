@@ -72,6 +72,23 @@ To run the analysis properly, you must configure the Excel instruction file corr
 * **Column `Scores`**: List all subject groups/categories (e.g., `High`, `Low`, `HC`). Ensure your experiment data file has a column named exactly `Scores`.
 * **Column `Output Folder`**: In the cell below this column header, provide the full path to the folder where result files and plots should be saved.
 
+### ⚠️ Important Note on Statistical Analysis
+
+The statistical results should be interpreted with caution. This tool performs multiple comparisons without applying corrections for multiple testing. It is intended to provide a **quick overview** of patterns and differences in the current data — not to serve as a definitive statistical conclusion.
+
+I recommend using this output to guide further, more rigorous statistical analysis.
+
+#### Statistical Methods Used
+
+Depending on the number of groups and whether pairing is requested, the following statistical tests are applied:
+
+* **Wilcoxon Signed-Rank Test**: For paired data with exactly 2 groups of equal size.
+* **Mann-Whitney U Test**: For unpaired 2-group comparisons.
+* **Kruskal-Wallis H Test**: For 3 to 5 group comparisons (non-parametric).
+* **ANOVA (F-test)**: For more than 5 groups.
+
+These are applied automatically based on data structure and CLI flags.
+
 ## Output
 
 * Excel file with grouped experimental results
