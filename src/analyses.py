@@ -9,7 +9,10 @@ provided in general_functions.py.
 
 import os
 import re 
+import gc
 import math
+import matplotlib
+matplotlib.use("Agg")
 
 import numpy as np
 import pandas as pd
@@ -19,7 +22,6 @@ import matplotlib.pyplot as plt
 
 from itertools import combinations
 from scipy.stats import f_oneway, kruskal, mannwhitneyu, wilcoxon
-
 
 from utils import general_functions as gf
 
@@ -347,7 +349,9 @@ def plot_swarm_box_grid(df: pd.DataFrame, configs: dict, grid_size: int = 5):
         start = page * plots_per_page
         end = start + plots_per_page
 
+        i = -1
         for i, column in enumerate(cols[start:end]):
+
             data = []
 
             for group in df.index:
@@ -370,22 +374,27 @@ def plot_swarm_box_grid(df: pd.DataFrame, configs: dict, grid_size: int = 5):
             ax.set_ylabel(ylabel)
             ax.grid(True, linestyle='--', linewidth=0.5, alpha=0.7)
 
+        if i == -1:
+            plt.close(fig)
+            continue  # Skip saving if no plots on this page
+
         # Hide unused axes
         for j in range(i + 1, plots_per_page):
             fig.delaxes(axes[j])
 
         plt.tight_layout()
 
-        filename = f"swarm_box_page_{page+1}.png"
+        filename = f"swarm_box_page_{page+1:02}.png"
         relative_path = os.path.join(VAR["outputs"]["images_folder"],filename)
         
         save_path = os.path.join(images_folder,filename)
-        plt.savefig(save_path, dpi=300)
+        plt.savefig(save_path, dpi=150)
         plt.close(fig)
+        gc.collect()
 
         print(gf.dotted_line_fill(relative_path,f"{page+1}/{num_pages}"))
     
-    print(f"DONE: All images saved\n{'-'*50}")
+    print(f"\nDONE: All images saved\n{'-'*50}")
 
 
 #%% === Outputs ===

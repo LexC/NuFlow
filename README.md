@@ -47,6 +47,12 @@ To launch the script bellow and follow the instructions.
 bash setting/miniconda_env_manager.sh
 ```
 
+After creating a virtual environment, you can activate it with:
+
+```bash
+conda activate <your-environment-name>
+```
+
 ## Usage
 
 ### Command-Line Interface (CLI)
