@@ -45,14 +45,15 @@ def global_variables():
             "config":{
                 "tab":"Configuration",
                 "cols": [gf.str_normalize(col) for col in instructions_db_config_cols],
-                "outputs":{
-                    "outputfolder": "output folder",
-                    "grouped_data": "grouped_data.xlsx",
-                    "results": "results.xlsx",
-                }
+                "outputfolder": "output folder",
                 }
         },
-        "dividers":["|","_"]
+        "dividers":["|","_"],
+        "outputs": {
+            "grouped_data": "grouped_data.xlsx",
+            "results": "results.xlsx",
+            "images_folder": "images"           
+        }
     }
 VAR = global_variables()
 
@@ -157,7 +158,7 @@ def load_config(input: str) -> dict:
         for col in df.columns
     }
 
-    ouputfolder_tab = VAR["instructions_db"]["config"]["outputs"]["outputfolder"]
+    ouputfolder_tab = VAR["instructions_db"]["config"]["outputfolder"]
 
     config_dict[ouputfolder_tab] = gf.path_fix(config_dict[ouputfolder_tab][0])
     gf.create_folders(config_dict[ouputfolder_tab])
@@ -330,10 +331,9 @@ def plot_swarm_box_grid(df: pd.DataFrame, configs: dict, grid_size: int = 5):
     sns.set(style="whitegrid", palette="pastel", font_scale=1.0)
     xlabel = "Scores"
     div = VAR["dividers"][0]
-    output_folder = configs[VAR["instructions_db"]["config"]["outputs"]["outputfolder"]]
-    gf.create_folders(output_folder)
-
-    os.makedirs(output_folder, exist_ok=True)
+    output_folder = configs[VAR["instructions_db"]["config"]["outputfolder"]]
+    images_folder = os.path.join(output_folder,VAR["outputs"]["images_folder"])
+    gf.create_folders(images_folder)
 
     cols = df.columns.tolist()
     plots_per_page = grid_size * grid_size
@@ -375,9 +375,11 @@ def plot_swarm_box_grid(df: pd.DataFrame, configs: dict, grid_size: int = 5):
             fig.delaxes(axes[j])
 
         plt.tight_layout()
+
+        filename = f"swarm_box_page_{page+1}.png"
+        relative_path = os.path.join(VAR["outputs"]["images_folder"],filename)
         
-        relative_path = os.path.join("images",f"swarm_box_page_{page+1}.png")
-        save_path = os.path.join(output_folder,relative_path)
+        save_path = os.path.join(images_folder,filename)
         plt.savefig(save_path, dpi=300)
         plt.close(fig)
 
@@ -399,8 +401,8 @@ def export_experiments_to_excel(experiments: dict, configs: str) -> None:
 
     df = experiments.copy()
     filename = os.path.join(
-        configs[VAR["instructions_db"]["config"]["outputs"]["outputfolder"]],
-        VAR["instructions_db"]["config"]["outputs"]["grouped_data"]
+        configs[VAR["instructions_db"]["config"]["outputfolder"]],
+        VAR["outputs"]["grouped_data"]
     )
     div = VAR["dividers"][0]
     
@@ -426,8 +428,8 @@ def export_grouped_data_to_excel(grouped_data: dict, configs: str) -> None:
 
     df = grouped_data.copy()
     filename = os.path.join(
-        configs[VAR["instructions_db"]["config"]["outputs"]["outputfolder"]],
-        VAR["instructions_db"]["config"]["outputs"]["grouped_data"]
+        configs[VAR["instructions_db"]["config"]["outputfolder"]],
+        VAR["outputs"]["grouped_data"]
     )
     
     for col in df.columns:
@@ -445,8 +447,8 @@ def export_stats(stats,configs):
     """
     df = stats.copy()
     filename = os.path.join(
-        configs[VAR["instructions_db"]["config"]["outputs"]["outputfolder"]],
-        VAR["instructions_db"]["config"]["outputs"]["results"]
+        configs[VAR["instructions_db"]["config"]["outputfolder"]],
+        VAR["outputs"]["results"]
     )
 
     gf.safe_append_to_excel(filename,df,"stats")
@@ -480,6 +482,12 @@ def parse_columns(experiments):
             newcolumns[col] = f" {div} ".join([parameter1,parameter2,method])
     
     experiments = experiments.rename(columns=newcolumns)
+
+    cols = sorted([col for col in experiments.columns if div in col])
+    cols_metad = [col for col in experiments.columns if div not in col]
+    reorder_cols = cols_metad + cols
+    experiments = experiments[reorder_cols]
+
     return experiments
     
 def parse1col(column_name, exptype):
