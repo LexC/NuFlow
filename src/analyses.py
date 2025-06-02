@@ -42,11 +42,11 @@ def global_variables():
         "instructions_db": {
             "data":{
                 "tab":"Data",
-                "cols": [gf.str_normalize(col) for col in instructions_db_data_cols]
+                "cols": [gf.str_normalize(col,lower=True) for col in instructions_db_data_cols]
                 },
             "config":{
                 "tab":"Configuration",
-                "cols": [gf.str_normalize(col) for col in instructions_db_config_cols],
+                "cols": [gf.str_normalize(col,lower=True) for col in instructions_db_config_cols],
                 "outputfolder": "output folder",
                 }
         },
@@ -211,7 +211,7 @@ def merge_and_filter_dfs(df_list: list[pd.DataFrame], configs: dict) -> pd.DataF
         pd.DataFrame: The merged and filtered DataFrame.
     """
 
-    merged_df = pd.concat(df_list, axis=0)
+    merged_df = pd.concat(df_list, axis=0)    
     merged_df = merged_df[merged_df['scores'].isin(configs.get('scores', []))]
     
     return parse_columns(merged_df)
@@ -413,12 +413,6 @@ def export_experiments_to_excel(experiments: dict, configs: str) -> None:
         configs[VAR["instructions_db"]["config"]["outputfolder"]],
         VAR["outputs"]["grouped_data"]
     )
-    div = VAR["dividers"][0]
-    
-    cols = [col for col in df.columns if div in col]
-    cols_metad = [col for col in df.columns if div not in col]
-    reorder_cols = cols_metad+cols
-    df = df[reorder_cols]
 
     df['scores'] = pd.Categorical(df['scores'], categories=configs['scores'], ordered=True)
     df = df.sort_values(by='scores')
@@ -496,6 +490,9 @@ def parse_columns(experiments):
     cols_metad = [col for col in experiments.columns if div not in col]
     reorder_cols = cols_metad + cols
     experiments = experiments[reorder_cols]
+
+    new_metad = {col: gf.str_normalize(col) for col in cols_metad}
+    experiments = experiments.rename(columns=new_metad)
 
     return experiments
     
